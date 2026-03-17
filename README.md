@@ -13,6 +13,7 @@
 
 <p align="center">
   <a href="Attention_Residuals.pdf">Paper</a> &nbsp;|&nbsp;
+  <a href="https://arxiv.org/abs/2603.15031">arXiv</a> &nbsp;|&nbsp;
   <a href="#overview">Overview</a> &nbsp;|&nbsp;
   <a href="#results">Results</a> &nbsp;|&nbsp;
   <a href="#citation">Citation</a>
